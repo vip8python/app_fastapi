@@ -2,8 +2,6 @@ from fastapi import FastAPI, Query
 from typing import Optional
 from datetime import date
 from booking.router import router as router_bookings
-import asyncio
-from gevent import monkey
 
 
 app = FastAPI()

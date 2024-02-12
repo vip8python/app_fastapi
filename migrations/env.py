@@ -4,12 +4,13 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from os.path import abspath, dirname
 from alembic import context
+from sqlalchemy.ext.asyncio import AsyncEngine
+
 from config import settings
-from hotels.models import Hotels
-from database import Base
 from hotels.models import Hotels, Rooms
 from booking.models import Bookings
 from users.models import Users
+from database import Base
 
 # sys.path.insert(0, dirname(dirname(abspath(__file__))))
 # this is the Alembic Config object, which provides
@@ -58,29 +59,23 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
+def run_migrations_online():
+    connectable = AsyncEngine(
+        engine_from_config(
+            config.get_section(config.config_ini_section),
+            prefix='sqlalchemy.',
+            poolclass=pool.NullPool,
+        )
     )
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata
         )
 
         with context.begin_transaction():
             context.run_migrations()
 
 
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
+run_migrations_online()

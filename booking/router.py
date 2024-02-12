@@ -15,7 +15,7 @@ async def get_bookings():
     async with async_session_maker() as session:
         query = select(Bookings)
         result = await session.execute(query)
-        print(result)
+        return result.mappings().all()
 
 
 
