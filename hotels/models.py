@@ -3,26 +3,24 @@ from database import Base
 
 
 class Hotels(Base):
-    __tablename__ = 'hotels'
+    __tablename__: str = 'hotels'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-    location = Column(String, nullable=False)
+    id: int = Column(Integer, primary_key=True)
+    name: str = Column(String, nullable=False)
+    location: str = Column(String, nullable=False)
     services = Column(JSON)
-    rooms_quantity = Column(Integer, nullable=False)
-    image_id = Column(Integer)
+    rooms_quantity: int = Column(Integer, nullable=False)
+    image_id: int = Column(Integer)
 
 
 class Rooms(Base):
-    __tablename__ = 'rooms'
+    __tablename__: str = 'rooms'
 
-
-    id = Column(Integer, primary_key=True, nullable=False)
+    id: int = Column(Integer, primary_key=True, nullable=False)
     hotel_id = Column(ForeignKey('hotels.id'), nullable=False)
-    name = Column(String, nullable=False)
-    description = Column(String, nullable=False)
-    price = Column(Integer, nullable=False)
-    services = Column(JSON, nullable=False)
-    quantity = Column(Integer, nullable=False)
-    image_id = Column(Integer)
-
+    name: str = Column(String, nullable=False)
+    description: str = Column(String, nullable=True)
+    price: int = Column(Integer, nullable=False)
+    services = Column(JSON, nullable=True)
+    quantity: int = Column(Integer, nullable=False)
+    image_id: int = Column(Integer)
