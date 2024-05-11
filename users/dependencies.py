@@ -3,7 +3,6 @@ from exceptions import TokenExpiredException, NotUserException, NotAdminExceptio
     TokenAbsentException
 from fastapi import Request, Depends
 import jwt
-
 from config import settings
 from users.dao import UsersDAO
 from users.models import Users
