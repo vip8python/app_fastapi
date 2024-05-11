@@ -10,7 +10,7 @@ def create_booking_confirmation_template(
     email = EmailMessage()
     email['subject'] = "confirm booking"
     email['from'] = settings.SMTP_USER
-    email_to['to'] = email_to
+    email['to'] = email_to
 
     email.set_content(
         f'''
@@ -19,4 +19,4 @@ def create_booking_confirmation_template(
 ''',
         subtype='html'
     )
-    return 'html'
+    return email

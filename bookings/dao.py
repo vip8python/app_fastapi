@@ -17,61 +17,55 @@ class BookingDAO(BaseDAO):
             date_from: date,
             date_to: date,
     ):
-        """with booked_rooms as (
-        select * from bookings
-        where room_id = 4 and
-        (data_from >= '2024-09-06' and date_from <= '2024-09-09') or
-        (date_from <= '2024-09-06' and date_to > '2024-09-06')
-        )
-        select rooms.quantity - count(booked_rooms.room_id) from rooms
-        left join booked_rooms on booked_rooms.room_id = rooms.id
-        where rooms.id = 4
-        group by rooms.quantity, booked_rooms.room_id
-        """
         async with async_session_maker() as session:
-            booked_rooms = select(Bookings).where(
-                and_(
-                    Bookings.room_id == room_id,
-                    or_(
-                        and_(
-                            Bookings.date_from >= date_from,
-                            Bookings.date_from <= date_to
-                        ),
-                        and_(
-                            Bookings.date_from <= date_from,
-                            Bookings.date_to > date_from
-                        ),
+            """
+            select rooms.quantity - count(room_id) as rooms_left from bookings
+            join rooms on rooms.id = bookings.room_id
+            where room_id = 4 and
+            (data_from < '2024-06-01' and date_from > '2024-06-01') or
+            (date_from > '2024-06-01' and date_to < '2024-06-25')
+            group by room_id, rooms.quantity;
+            """
+        get_rooms_left = select(
+            Rooms.quantity - func.count(Bookings.room_id).label('rooms_left')
+        ).select_from(Bookings).join(
+            Rooms, Rooms.id == Bookings.room_id, full=True
+        ).where(
+            and_(
+                Rooms.id == room_id,
+                or_(
+                    Bookings.room_id.is_(None),
+                    and_(
+                        Bookings.date_from < date_from,
+                        Bookings.date_from > date_from
+                    ),
+                    and_(
+                        Bookings.date_from > date_from,
+                        Bookings.date_from < date_to
                     )
                 )
-            ).cte('booked_rooms')
-
-            get_rooms_left = select(
-                (Rooms.quantity - func.count(booked_rooms.c.room_id)).label('rooms_left')
-            ).select_from(Rooms).join(
-                booked_rooms, booked_rooms.c.room_id == Rooms.id, isouter=True
-            ).where(Rooms.id == booked_rooms.c.room_id).group_by(
-                Rooms.quantity, booked_rooms.c.room_id
             )
+        ).group_by(Rooms.id, Rooms.quantity)
+        rooms_left = await session.execute(get_rooms_left)
+        rooms_left = rooms_left.scalar()
 
-            print(get_rooms_left.compile(engine, compile_kwargs={'literal_binds': True}))
-            rooms_left = await session.execute(get_rooms_left)
-            rooms_left = rooms_left.scalar()
+        print(get_rooms_left.compile(engine, compile_kwargs={'literal_binds': True}))
 
-            if not rooms_left or rooms_left > 0:
-                get_price = await session.execute(select(Rooms.price).filter_by(id=room_id))
-                add_booking = insert(Bookings).values(
-                    room_id=room_id,
-                    user_id=user_id,
-                    date_from=date_from,
-                    date_to=date_to,
-                    price=get_price.scalar()
-                ).returning(Bookings)
-                new_booking = await session.execute(add_booking)
-                await session.commit()
-                return new_booking.scalar()
+        if not rooms_left or rooms_left > 0:
+            get_price = await session.execute(select(Rooms.price).filter_by(id=room_id))
+            add_booking = insert(Bookings).values(
+                room_id=room_id,
+                user_id=user_id,
+                date_from=date_from,
+                date_to=date_to,
+                price=get_price.scalar()
+            ).returning(Bookings)
+            new_booking = await session.execute(add_booking)
+            await session.commit()
+            return new_booking.scalar()
 
-    @classmethod
-    async def delete_booking(cls, booking_id, current_user):
-        async with async_session_maker() as session:
-            pass
 
+@classmethod
+async def delete_booking(cls, booking_id, current_user):
+    async with async_session_maker() as session:
+        pass

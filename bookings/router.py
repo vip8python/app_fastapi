@@ -27,13 +27,17 @@ async def add_booking(
         user: Users = Depends(get_current_user),
 ):
     booking = await BookingDAO.add(user.id, room_id, date_from, date_to)
-    booking_dict = parse_obj_as(SBooking, booking).dict()
-    send_booking_confirmation_email.delay(booking_dict, user.email)
-    return booking_dict
+    if booking:
+        booking_dict = parse_obj_as(SBooking, booking).dict()
+        send_booking_confirmation_email.delay(booking_dict, user.email)
+        return booking_dict
+    else:
+        return {'message': 'Failed to add booking'}, 400
+
 
 @router.delete('')
 async def remove_booking(
-        booking_id: int
-
+        booking_id: int,
+        current_user: Users = Depends(get_current_user),
 ):
-    pass
+    await BookingDAO.delete_booking(booking_id, current_user)
