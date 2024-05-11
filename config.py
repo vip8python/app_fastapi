@@ -15,6 +15,10 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str
     ALGORITHM: str
+    ADMIN: str
+    MAIN: str
+    BROKER: str
+    INCLUDE: str
 
     class Config:
         env_file = '.env'
