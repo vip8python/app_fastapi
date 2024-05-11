@@ -1,7 +1,12 @@
 from datetime import date
+
+from pydantic import parse_obj_as
+
+from bookings.schemas import SBooking
 from exceptions import RoomCannotBeBooked
 from fastapi import APIRouter, Depends
 from bookings.dao import BookingDAO
+from tasks.celery_tasks import send_booking_confirmation_email
 from users.dependencies import get_current_user
 from users.models import Users
 
@@ -22,5 +27,13 @@ async def add_booking(
         user: Users = Depends(get_current_user),
 ):
     booking = await BookingDAO.add(user.id, room_id, date_from, date_to)
-    if not booking:
-        raise RoomCannotBeBooked
+    booking_dict = parse_obj_as(SBooking, booking).dict()
+    send_booking_confirmation_email.delay(booking_dict, user.email)
+    return booking_dict
+
+@router.delete('')
+async def remove_booking(
+        booking_id: int
+
+):
+    pass

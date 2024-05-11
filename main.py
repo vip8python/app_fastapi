@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from bookings.router import router as router_bookings
+from config import settings
 from users.router import router as router_users
 from hotels.router import router as router_hotels
 from pages.router import router as router_pages
@@ -34,7 +35,7 @@ app.add_middleware(
 
 
 async def get_redis():
-    return await aioredis.create_redis_pool("redis://localhost")
+    return await aioredis.create_redis_pool(settings.REDIS_BROKER)
 
 
 async def close_redis(redis):

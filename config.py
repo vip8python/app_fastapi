@@ -15,10 +15,17 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str
     ALGORITHM: str
+
     ADMIN: str
-    MAIN: str
-    BROKER: str
-    INCLUDE: str
+
+    REDIS_MAIN: str
+    REDIS_BROKER: str
+    REDIS_INCLUDE: str
+
+    SMTP_HOST: str
+    SMTP_PORT: int
+    SMTP_USER: str
+    SMTP_PASS: str
 
     class Config:
         env_file = '.env'
