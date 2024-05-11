@@ -59,4 +59,4 @@ async def get_redis_pool():
 @app.get('/')
 async def read_item(redis: aioredis.Redis = Depends(get_redis_pool)):
     value = await redis.get('example_key')
-    return {'message': f'Value from redis: {value.decode() if value else None}'}
+    return {'message': f'Value from Redis: {value.decode() if value else None}'}
