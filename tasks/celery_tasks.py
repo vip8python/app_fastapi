@@ -19,7 +19,7 @@ def process_pic(
     im_resized_200_100.save(f'static/images/resized_200_100_{im_path.name}')
 
 
-@celery.task
+# @celery.task
 def send_booking_confirmation_email(
         booking: dict,
         email_to: EmailStr
